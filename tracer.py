@@ -2,11 +2,18 @@
 
 from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from time import sleep
+from sys import argv
+from db import db
 
 client = ModbusClient(method = 'rtu', port = '/dev/ttyXRUSB0', baudrate = 115200)
 client.connect()
-devId = 3
-while True:
+print(len(argv))
+if len(argv) > 1:
+    devId = int(argv[1])
+else:
+    print(f"usage: {argv[0]} devId")
+    quit()
+if True:
     result = client.read_input_registers(0x3100,16,unit=devId)
     dat = {}
     dat['solarVoltage'] = float(result.registers[0] / 100.0)
@@ -32,6 +39,7 @@ while True:
     # Do something with the data
     for (k,v) in dat.items():
         print(f'{k:} {v}')
+    db.dbsave(f"pv_{devId}",dat)
 
 #print("Load Power: " + str(loadPower))
     
