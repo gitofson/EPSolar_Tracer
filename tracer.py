@@ -4,14 +4,23 @@ from pymodbus.client.sync import ModbusSerialClient as ModbusClient
 from time import sleep
 from sys import argv
 from db import db
+from os import path
 import struct
 
-client = ModbusClient(method = 'rtu', port = '/dev/ttyXRUSB0', baudrate = 115200)
-client.connect()
-print(len(argv))
+def locateDevicePath():
+    for i in range(2):
+        dev=f'/dev/ttyXRUSB{i}'
+        if path.exists(dev):
+            return dev
+    return None
 def getFloat(bits):
     s = struct.pack('>L',bits)
     return struct.unpack('>f', s)[0]
+
+client = ModbusClient(method = 'rtu', port = locateDevicePath(), baudrate = 115200)
+client.connect()
+print(len(argv))
+print(locateDevicePath())
 if len(argv) > 1:
     devId = int(argv[1])
 else:
